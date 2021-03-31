@@ -1,66 +1,46 @@
+const colors = ['#A05BFD', '#777375', '#764A2C', '#F76915', '#72C075','#072238', '#263E51', '#F5584C', '#16D298', '#EB2F6F', '#FB9901', '#37CB39', '#3D9DCE', '#5640D2', '#DF9326', '#2B70A0'];
 
-$(document).ready(function() {
-    //object containing parameters for ajax method
-    const settings = {
-        "async": true,
-        "crossDomain": true,
-        "url": "https://type.fit/api/quotes",
-        "method": "GET"
-    }
+function randomColorPicker() {
+    let randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-    //get quote from API and place it into appropriate field
-    $.ajax(settings).done(function (response) {
-        const data = JSON.parse(response);
-        //randomIndex is used to fetch random quote
-        let randomIndex = Math.floor(Math.random() * 1642);
-        console.log(data[randomIndex]);
-        $("#quote-text").text(data[randomIndex].text);
-        $("#author").text(
-            data[randomIndex].author == null ? 
-                '-Anonymous' :
-                `-${data[randomIndex].author}`
-        );
-    });
-
-    //array of colors to choose from
-    const colors = ['#A05BFD', '#777375', '#764A2C', '#F76915', '#72C075', 
-                    '#072238', '#263E51', '#F5584C', '#16D298', '#EB2F6F', 
-                    '#FB9901', '#37CB39', '#3D9DCE', '#5640D2', '#DF9326',
-                    '#2B70A0'];
-
-    //selecting random color
-    let randomColorIndex = Math.floor(Math.random() * colors.length);
-    let randomColor = colors[randomColorIndex];
-
-    $('body').css({
+    $('body').animate({
         'background-color': randomColor,
         'color': randomColor
-    });
+    }, 500);
 
-    $('.button').css({ 'background-color': randomColor });
+    $('.button').animate({'background-color': randomColor}, 500);
+}
+
+function getQuote() {
+    //get quote from API and place it into appropriate field
+    $.getJSON("https://type.fit/api/quotes", function(data) {
+        //randomIndex is used to fetch random quote
+        let randomIndex = Math.floor(Math.random() * data.length);
+        let quote = data[randomIndex].text;
+        let author = 
+            data[randomIndex].author == null ? 
+                '-Anonymous' :
+                `-${data[randomIndex].author}`;
+
+        // $('#quote-text').css({'opacity': 0});
+        // $('#author').css({'opacity': 0});
+
+        $("#quote-text").text(quote);
+        $("#author").text(author);
+        $('.quote').fadeIn(500);
+        $('a#tweet-quote').attr({'href': `https://twitter.com/intent/tweet?hashtags=quotes&amp;related=freecodecamp&amp;text=${quote} ${author}`});
+        $('a#tumblr-quote').attr({'href': `https://www.tumblr.com/widgets/share/tool?posttype=quote&amp;tags=quotes,freecodecamp&amp;caption=${author};content=${quote};canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&amp;shareSource=tumblr_share_button`});
+    });
+}
+
+$(document).ready(function() {
+    randomColorPicker();
+    getQuote();    
 
     $('#new-quote').click(function(e) {
-        $.ajax(settings).done(function (response) {
-            const data = JSON.parse(response);
-            //randomIndex is used to fetch random quote
-            let randomIndex = Math.floor(Math.random() * 1642);
-            console.log(data[randomIndex]);
-            $("#quote-text").text(data[randomIndex].text);
-            $("#author").text(
-                data[randomIndex].author == null ? 
-                    '-Anonymous' :
-                    `-${data[randomIndex].author}`
-            );
-        });
+        $(".quote").fadeOut(400);
 
-        let randomColorIndex = Math.floor(Math.random() * colors.length);
-        let randomColor = colors[randomColorIndex];
-
-        $('body').css({
-            'background-color': randomColor,
-            'color': randomColor
-        });
-    
-        $('.button').css({ 'background-color': randomColor });
+        randomColorPicker();
+        getQuote();
     });
 });
